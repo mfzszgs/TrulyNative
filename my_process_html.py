@@ -14,9 +14,9 @@ def parse_page(in_file, urlid):
     doc = {
             "id": urlid, 
             "text":parse_text(soup),
-#            "title":parse_title(soup ),
-#            "links":parse_links(soup),
-#            "images":parse_images(soup),
+            "title":parse_title(soup ),
+            "links":parse_links(soup),
+            "images":parse_images(soup),
            }
 
     return doc
@@ -99,16 +99,15 @@ def main(argv):
                 - this will loop over all raw_files and create processed ouput for
                   a give site_id IF input data for that id exists, otherwise it will
                   skip it """
-    if len(argv) < 3:
-
-        print " Usage: python crawler.py <input_raw_dir> <output_directory>"
-        return
-
-    else:
+    if len(argv) == 3:
 
         inFolder = argv[1]
         outputDirectory = argv[2]
 
+    else:
+        inFolder = "./data"
+        outputDirectory = "./output"
+    
         if not os.path.exists(inFolder):
             print inFolder," does not exist"
             return
@@ -132,34 +131,24 @@ def main(argv):
 
             if bucket != last_bucket or filename==fIn[-1]:            
                 print 'SAVING BUCKET %s' % last_bucket
-                id_file = os.path.join(outputDirectory, 'chunk' + last_bucket + 'id')
-                text_file = os.path.join(outputDirectory, 'chunk' + last_bucket + 'text')
+                out_file = os.path.join(outputDirectory, 'chunk' + last_bucket + '.json')
 
-                with open(id_file, mode='w') as id_open:
-                    id_open.writelines(id_text)
+                with open(out_file, mode='w') as feedsjson:
+                    for entry in json_array:
+                        json.dump(entry, feedsjson)
+                        feedsjson.write('\n')
 
-                with open(text_file, mode='w') as text_open:
-                    text_open.writelines(id_text)
-
-                id_open.close()
-                text_open.close()
-                #json_array = []  
-                id_array=[]
-                text_array=[]
+                feedsjson.close()
+                json_array = []  
                 last_bucket = bucket 
 
             try:
                 doc = parse_page(filename, urlId)
-                id_=doc["id"]
-                text_=doc["text"]
-                
             except Exception as e:
                 ferr.write("parse error with reason : "+str(e)+" on page "+urlId+"\n")
                 continue
 
-            #json_array.append(doc)
-            id_array.append(id_)
-            text_array.append(text_)
+            json_array.append(doc)
             
            
     print "Scraping completed .. There may be errors .. check log at errors_in_scraping.log"

@@ -1,1 +1,7 @@
 /data
+/.project
+/.pydevproject
+/errors_in_scraping.log
+/given_script/errors_in_scraping.log
+/output/
+
